@@ -62,12 +62,29 @@ class FileSelectorComponent():
         imgui.push_item_width(-1.0)
 
         for f in self._fsFilelist:
-            _, _ = imgui.selectable(f, (f == os.path.basename(self.fsSelectedFilepath)))
+            # Decide if a directory
+            isDir = os.path.isdir(os.path.join(self.fsFileDir, f))
 
+            # Create the ui label name
+            label = f
+            if isDir:
+                label += "/"
+
+            # Render the selectable
+            _, _ = imgui.selectable(label, (f == os.path.basename(self.fsSelectedFilepath)))
+
+            # Handle selectable interaction
             if imgui.is_item_hovered():
+                # Check type of click
                 if imgui.is_mouse_double_clicked():
-                    # Entered
-                    print(f"{f} (enter)")
+                    # Attempt to Enter or Execute
+                    if isDir:
+                        # Enter directory
+                        print(f"{f} (enter)")
+                        # self._fsSetSelectedDir()
+                    else:
+                        # Execute file
+                        pass
                 elif imgui.is_mouse_clicked():
                     # Selected
                     self._fsSetSelectedFile(f)
@@ -102,3 +119,11 @@ class FileSelectorComponent():
             self._fsSelected = self._fsFilelist.index(filename)
             self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
             self.fsInputPath = self.fsSelectedFilepath
+
+    def _fsSetSelectedDir(self, dir):
+        """
+        Sets the currently focused directory to the provided.
+
+        dir: A stirng directory path.
+        """
+        pass
