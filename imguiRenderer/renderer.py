@@ -30,6 +30,9 @@ class PygletImGui():
         Constructs the PygletImgui Renderer.
         Run `present(...)` to present the window.
         """
+        # Init the supers
+        super(PygletImGui, self).__init__()
+
         # Get the current directory path
         curDirPath = os.path.split(__file__)[0]
 
@@ -125,7 +128,10 @@ class PygletImGui():
 
         data: Some number?
         """
+        # Start the Frame
         imgui.new_frame()
+
+        # Configure the menu bar
         if imgui.begin_main_menu_bar():
             if imgui.begin_menu("File", True):
 
@@ -139,8 +145,10 @@ class PygletImGui():
                 imgui.end_menu()
             imgui.end_main_menu_bar()
 
+        # Run the default ImGui test window
         show_test_window()
 
+        # Run another demo ImGui window
         imgui.begin("Custom window", True)
         imgui.text("Bar")
         imgui.text_colored("Eggs", 0.2, 1., 0.)
@@ -148,7 +156,7 @@ class PygletImGui():
         imgui.text_ansi("B\033[31marA\033[mnsi ")
         imgui.text_ansi_colored("Eg\033[31mgAn\033[msi ", 0.2, 1., 0.)
 
-        imgui.end()
+        imgui.end() # Ends building of "Custom Window". Does _not_ end the frame.
 
     def renderBackground(self, data):
         """
@@ -216,4 +224,23 @@ class PygletImGuiFull(PygletImGui, AllComponents):
     A wrapper for Pyglet that allows ImGui to be rendered directly.
     Also includes all extra UI components.
     """
-    pass
+    ## Render Methods
+    def renderImgui(self, data):
+        """
+        Configures what ImGui content will be shown.
+
+        Overide this function to change the Gui.
+
+        data: Some number?
+        """
+        # Run the super
+        super(PygletImGuiFull, self).renderImgui(data)
+
+        # Show the test windows
+        self.uiError("This is a demo error.")
+
+        def textInputAction(answer):
+            print(answer)
+        self.uiTextInput("Text Input", "This is a demo text input.", "Submit", textInputAction)
+
+        self.uiFileSelect()
