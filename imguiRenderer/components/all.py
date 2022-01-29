@@ -8,4 +8,11 @@ from .fileSelect import FileSelectorComponent
 
 ## Classes
 class AllComponents(AlertsComponents, InputComponents, FileSelectorComponent):
-    pass
+    """
+    Includes access to all components and their class components.
+    """
+    ## Constructor
+    def __init__(self) -> None:
+        super(AlertsComponents, self).__init__()
+        super(InputComponents, self).__init__()
+        super(FileSelectorComponent, self).__init__()

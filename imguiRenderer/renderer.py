@@ -39,11 +39,6 @@ class PygletImGui():
         # Assign variables
         self.window = None
         self._renderer = None
-        self._fileBrowser = {
-            "path": curDirPath,
-            "curInd": 0,
-            "files": sorted(os.listdir(path=curDirPath))
-        }
 
     ## Methods
     def present(self, title, maximize = DEFAULT_MAXIMIZE, fullscreen = DEFAULT_FULLSCREEN, size = DEFAULT_WIN_SIZE):
@@ -224,6 +219,15 @@ class PygletImGuiFull(PygletImGui, AllComponents):
     A wrapper for Pyglet that allows ImGui to be rendered directly.
     Also includes all extra UI components.
     """
+    ## Constructor
+    def __init__(self) -> None:
+        """
+        Constructs the PygletImgui Renderer.
+        Run `present(...)` to present the window.
+        """
+        # Init the supers
+        super(PygletImGuiFull, self).__init__()
+
     ## Render Methods
     def renderImgui(self, data):
         """
