@@ -15,23 +15,11 @@ class FileSelectorComponent():
         """
         initialPath: A string path indicating the directory to start the file select in. Defaults to the present working directory.
         """
-        # Get the current filepath
-        self.fsFileDir = self.expandStringPath(initialPath)
-
-        # Get the files at the start directory
+        # Set the intial selections
+        startingDir = os.path.basename(self.expandStringPath(initialPath))
+        self.fsFileDir = self.expandStringPath(os.path.join(initialPath, "../"))
         self._fsFilelist = os.listdir(self.fsFileDir)
-
-        # Select the first item
-        self._fsSelected = 0
-        if len(self._fsFilelist) > 0:
-            # Start with the top file
-            self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
-        else:
-            # Start with the current directory since it's empty
-            self.fsSelectedFilepath = self.fsFileDir
-
-        # Set the current input path
-        self.fsInputPath = self.fsSelectedFilepath
+        self._fsSetSelectedDir(startingDir)
 
     ## UI Functions
     def uiFileSelect(self):
@@ -80,8 +68,7 @@ class FileSelectorComponent():
                     # Attempt to Enter or Execute
                     if isDir:
                         # Enter directory
-                        print(f"{f} (enter)")
-                        # self._fsSetSelectedDir()
+                        self._fsSetSelectedDir(f)
                     else:
                         # Execute file
                         pass
@@ -120,10 +107,33 @@ class FileSelectorComponent():
             self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
             self.fsInputPath = self.fsSelectedFilepath
 
-    def _fsSetSelectedDir(self, dir):
+    def _fsSetSelectedDir(self, dirname):
         """
         Sets the currently focused directory to the provided.
 
-        dir: A stirng directory path.
+        dirname: A string directory name from the current directory to focus.
         """
-        pass
+        # Check if the directory name is present
+        if dirname in self._fsFilelist:
+            # Resolve the full new path
+            dirPath = os.path.join(self.fsFileDir, dirname)
+
+            # Check if a directory
+            if os.path.isdir(dirPath):
+                # Set the new target directory
+                self.fsFileDir = self.expandStringPath(dirPath)
+
+                # Get the files at the start directory
+                self._fsFilelist = os.listdir(self.fsFileDir)
+
+                # Select the first item
+                self._fsSelected = 0
+                if len(self._fsFilelist) > 0:
+                    # Start with the top file
+                    self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
+                else:
+                    # Start with the current directory since it's empty
+                    self.fsSelectedFilepath = self.fsFileDir
+
+                # Set the current input path
+                self.fsInputPath = self.fsSelectedFilepath
