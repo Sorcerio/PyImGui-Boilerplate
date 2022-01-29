@@ -5,17 +5,6 @@
 import os
 import imgui
 
-# self._fileBrowser = {
-#    "path": os.path.split(__file__)[0],
-#    "curInd": 0,
-#    "files": []
-# }
-
-# self._fileBrowser = {
-#    "path": os.path.split(__file__)[0],
-#    "files": {}
-# }
-
 class FileSelectorComponent():
     """
     Allows for local file browsing and selection in ImGui.
@@ -24,7 +13,7 @@ class FileSelectorComponent():
     ## Constructor
     def __init__(self) -> None:
         # Assign variables
-        self.fsFilepath = "./"
+        self.fsFilepath = self.expandStringPath("./")
         self._fsFilelist = []
 
     ## Functions
@@ -52,3 +41,15 @@ class FileSelectorComponent():
         imgui.pop_item_width()
 
         imgui.end()
+
+    def expandStringPath(self, path) -> str:
+        """
+        Expands a provided string path.
+
+        path: A string path.
+
+        Returns a cleaned string path.
+        """
+        path = os.path.expanduser(path)
+        path = os.path.abspath(path)
+        return path
