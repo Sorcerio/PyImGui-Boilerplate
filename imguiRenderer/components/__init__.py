@@ -1,5 +1,6 @@
 ## ImGui Renderer Components
 __all__ = [
     "alerts",
-    "inputs"
+    "inputs",
+    "fileSelect"
 ]

@@ -8,7 +8,7 @@ import imgui
 class InputComponents():
     """
     Adds input based components to the subclass.
-    This includes a system to handle multiple text inputs gracefully.
+    This includes class components to handle multiple text inputs gracefully.
     """
     ## Statics
     BAD_RESPONSE = "Invalid Tag"
