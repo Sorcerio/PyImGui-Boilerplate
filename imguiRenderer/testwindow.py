@@ -1,3 +1,5 @@
+## Supplied from PyimgGui.
+
 # -*- coding: utf-8 -*-
 import imgui
 import sys
