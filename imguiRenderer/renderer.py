@@ -7,7 +7,9 @@ import pyglet
 from pyglet import gl, image
 import imgui
 from imgui.integrations.pyglet import create_renderer
+
 from .testwindow import show_test_window
+from .components.all import AllComponents
 
 ## Constants
 DEFAULT_WIN_WIDTH = 1280
@@ -208,3 +210,10 @@ class PygletImGui():
         # Render the frame
         imgui.render()
         self._renderer.render(imgui.get_draw_data())
+
+class PygletImGuiFull(PygletImGui, AllComponents):
+    """
+    A wrapper for Pyglet that allows ImGui to be rendered directly.
+    Also includes all extra UI components.
+    """
+    pass

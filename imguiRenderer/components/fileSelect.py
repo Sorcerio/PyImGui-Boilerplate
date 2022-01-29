@@ -6,7 +6,7 @@ import os
 import imgui
 
 ## Classes
-class FileSelector():
+class FileSelectorComponent():
     """
     Allows for local file browsing and selection in ImGui.
     This includes class components to hanlde this.
