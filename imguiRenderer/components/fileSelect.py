@@ -12,21 +12,31 @@ class FileSelectorComponent():
     """
     ## Statics
     FS_BACK_INDICATOR = ".."
+    FS_START_PATH = "./"
 
     ## Constructor
-    def __init__(self, initialPath="./") -> None:
-        """
-        initialPath: A string path indicating the directory to start the file select in. Defaults to the present working directory.
-        """
-        # Set the intial selections
-        self._fsSetToProvidedDir(initialPath)
+    def __init__(self) -> None:
+        # Set initial variables
+        self._fsIsOpen = False
 
     ## UI Functions
-    def uiFileSelect(self):
+    def uiFileSelect(self, completion = None, selectButton = "Open", cancelButton = "Cancel"):
         """
         Renders a File Select Ui.
         The currently selected path is accessible at `fsSelectedFilepath`.
+
+        completion: A function to execute when the select or cancel buttons are pressed. This function must has 1 parameter to take the selected filepath. `None` will be sent to the provided completion function if the cancel action is taken. Provide `None` here to provide no completion.
+        selectButton: A string to label the open action button with.
+        cancelButton: A string to label the cancel action button with. Provide `None` to show no cancel option.
         """
+        # Check if the file select is not yet open
+        if not self._fsIsOpen:
+            # Show the initial directory
+            self._fsSetToProvidedDir(FileSelectorComponent.FS_START_PATH)
+
+            # Mark as open
+            self._fsIsOpen = True
+
         # Display the text input window
         imgui.begin(label="File Select", closable=False, flags=0)
 
@@ -38,15 +48,15 @@ class FileSelectorComponent():
 
         # Show top bar
         imgui.push_item_width(barAddrW)
-        clicked, self.fsInputPath = imgui.input_text(label="", value=self.fsInputPath, buffer_length=256)
+        clicked, self._fsInputPath = imgui.input_text(label="", value=self._fsInputPath, buffer_length=256)
         imgui.pop_item_width()
 
         # Show top bar go button
         imgui.same_line()
         if imgui.button(label="Go", width=-1):
-            self._fsSetToProvidedDir(self.fsInputPath)
+            self._fsSetToProvidedDir(self._fsInputPath)
 
-        # Directory content
+        # Show directory content
         imgui.push_item_width(-1.0)
 
         for f in self._fsFilelist:
@@ -77,6 +87,24 @@ class FileSelectorComponent():
                     self._fsSetSelectedFile(f)
 
         imgui.pop_item_width()
+
+        # Show completion buttons
+        # Check if a cancel option is available
+        if cancelButton != None:
+            # Both buttons
+            # Calculate button size
+            btnCompW = round(winSizeAvail[0] / 2)
+
+            if imgui.button(label=selectButton, width=btnCompW):
+                self._fsCompleteSelect(completion)
+
+            imgui.same_line()
+            if imgui.button(label=cancelButton, width=btnCompW):
+                self._fsCompleteCancel(completion)
+        else:
+            # Only select button
+            if imgui.button(label=selectButton, width=-1.0):
+                self._fsCompleteSelect(completion)
 
         # End window
         imgui.end()
@@ -110,7 +138,7 @@ class FileSelectorComponent():
             else:
                 self.fsSelectedFilepath = self.fsFileDir
 
-            self.fsInputPath = self.fsSelectedFilepath
+            self._fsInputPath = self.fsSelectedFilepath
 
     def _fsSetSelectedDir(self, dirname):
         """
@@ -138,16 +166,8 @@ class FileSelectorComponent():
                 self._fsSelected = 0
                 self.fsSelectedFilepath = self.fsFileDir
 
-                # self._fsSelected = 1
-                # if len(self._fsFilelist) > 1:
-                #     # Start with the top file
-                #     self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
-                # else:
-                #     # Start with the current directory since it's empty
-                #     self.fsSelectedFilepath = self.fsFileDir
-
                 # Set the current input path
-                self.fsInputPath = self.fsSelectedFilepath
+                self._fsInputPath = self.fsSelectedFilepath
 
     def _fsSetToProvidedDir(self, dirPath):
         """
@@ -171,3 +191,27 @@ class FileSelectorComponent():
         else:
             # Get the file's directory name
             self._fsSetToProvidedDir(os.path.dirname(dirPath))
+
+    def _fsCompleteSelect(self, completion):
+        """
+        Completes the file select with as a selection action.
+
+        completion: A function to call in completetion. Provide `None` for no completion.
+        """
+        if completion != None:
+            completion(self._fsInputPath)
+
+        self.fsSelectedFilepath = self._fsInputPath
+        self._fsIsOpen = False
+
+    def _fsCompleteCancel(self, completion):
+        """
+        Completes the file select with as a cancel action.
+
+        completion: A function to call in completetion. Provide `None` for no completion.
+        """
+        if completion != None:
+            completion(None)
+
+        self.fsSelectedFilepath = None
+        self._fsIsOpen = False

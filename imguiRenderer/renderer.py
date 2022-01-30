@@ -244,7 +244,9 @@ class PygletImGuiFull(PygletImGui, AllComponents):
         self.uiError("This is a demo error.")
 
         def textInputAction(answer):
-            print(answer)
+            print(f"Text Input: {answer}")
         self.uiTextInput("Text Input", "This is a demo text input.", "Submit", textInputAction)
 
-        self.uiFileSelect()
+        def fileSelectComp(filepath):
+            print(f"File Selected: {filepath}")
+        self.uiFileSelect(completion=fileSelectComp)
