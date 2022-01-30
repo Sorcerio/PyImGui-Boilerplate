@@ -14,15 +14,12 @@ class FileSelectorComponent():
     FS_BACK_INDICATOR = ".."
 
     ## Constructor
-    def __init__(self, initialPath="./") -> None:
+    def __init__(self, initialPath="./README.md") -> None:
         """
         initialPath: A string path indicating the directory to start the file select in. Defaults to the present working directory.
         """
         # Set the intial selections
-        startingDir = os.path.basename(self.expandStringPath(initialPath))
-        self.fsFileDir = self.expandStringPath(os.path.join(initialPath, "../"))
-        self._fsFilelist = os.listdir(self.fsFileDir)
-        self._fsSetSelectedDir(startingDir)
+        self._fsSetToProvidedDir(initialPath)
 
     ## UI Functions
     def uiFileSelect(self):
@@ -117,7 +114,7 @@ class FileSelectorComponent():
 
     def _fsSetSelectedDir(self, dirname):
         """
-        Sets the currently focused directory to the provided.
+        Navigates the currently focused directory into the one provided.
 
         dirname: A string directory name from the current directory to focus.
         """
@@ -148,3 +145,26 @@ class FileSelectorComponent():
 
                 # Set the current input path
                 self.fsInputPath = self.fsSelectedFilepath
+
+    def _fsSetToProvidedDir(self, dirPath):
+        """
+        Sets the currently focused directory to the provided.
+
+        dirPath: A string directory path to focus on.
+        """
+        # Expand the dirpath
+        dirPath = self.expandStringPath(dirPath)
+
+        # Check if the dirpath is a directory
+        if os.path.isdir(dirPath):
+            # Proceed with this directory
+            # Get the starting dir name
+            startingDir = os.path.basename(dirPath)
+
+            # Focus on the provided directory
+            self.fsFileDir = self.expandStringPath(os.path.join(dirPath, "../"))
+            self._fsFilelist = os.listdir(self.fsFileDir)
+            self._fsSetSelectedDir(startingDir)
+        else:
+            # Get the file's directory name
+            self._fsSetToProvidedDir(os.path.dirname(dirPath))
