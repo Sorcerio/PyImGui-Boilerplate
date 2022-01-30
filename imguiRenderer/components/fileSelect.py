@@ -14,7 +14,7 @@ class FileSelectorComponent():
     FS_BACK_INDICATOR = ".."
 
     ## Constructor
-    def __init__(self, initialPath="./README.md") -> None:
+    def __init__(self, initialPath="./") -> None:
         """
         initialPath: A string path indicating the directory to start the file select in. Defaults to the present working directory.
         """
@@ -44,7 +44,7 @@ class FileSelectorComponent():
         # Show top bar go button
         imgui.same_line()
         if imgui.button(label="Go", width=-1):
-            pass
+            self._fsSetToProvidedDir(self.fsInputPath)
 
         # Directory content
         imgui.push_item_width(-1.0)
@@ -135,13 +135,16 @@ class FileSelectorComponent():
                 self._fsFilelist.insert(0, FileSelectorComponent.FS_BACK_INDICATOR)
 
                 # Select the first item
-                self._fsSelected = 1
-                if len(self._fsFilelist) > 1:
-                    # Start with the top file
-                    self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
-                else:
-                    # Start with the current directory since it's empty
-                    self.fsSelectedFilepath = self.fsFileDir
+                self._fsSelected = 0
+                self.fsSelectedFilepath = self.fsFileDir
+
+                # self._fsSelected = 1
+                # if len(self._fsFilelist) > 1:
+                #     # Start with the top file
+                #     self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
+                # else:
+                #     # Start with the current directory since it's empty
+                #     self.fsSelectedFilepath = self.fsFileDir
 
                 # Set the current input path
                 self.fsInputPath = self.fsSelectedFilepath
