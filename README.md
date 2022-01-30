@@ -1,9 +1,16 @@
 # ImGui Boilerplate
 
 >
-> A boilerplate for working with PyimGui that is packaged prebuilt common UI elements.
+> A boilerplate for working with PyImGui that is packaged prebuilt common UI elements.
 >
 
 ## Supported Renderers
 
 * Pyglet
+
+## Components
+
+* File Browser
+* Text Input Prompt
+* Alert Prompt
+* Warning Prompt
