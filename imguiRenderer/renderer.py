@@ -33,21 +33,19 @@ class PygletImGui():
         # Init the supers
         super(PygletImGui, self).__init__()
 
-        # Get the current directory path
-        curDirPath = os.path.split(__file__)[0]
-
         # Assign variables
         self.window = None
         self._renderer = None
 
     ## Methods
-    def present(self, title, maximize = DEFAULT_MAXIMIZE, fullscreen = DEFAULT_FULLSCREEN, size = DEFAULT_WIN_SIZE):
+    def present(self, title, maximize = DEFAULT_MAXIMIZE, fullscreen = DEFAULT_FULLSCREEN, size = DEFAULT_WIN_SIZE, iconsPath = None):
         """
         When called, opens the Pyglet window and renders the configured content.
 
         title: A string title to present on the window.
         fullscreen: A bool inidicating if the window should start in fullscreen.
         size: A tuple representing the initial window size as (width, height).
+        iconsPath: A string directory path indicating where the 16x16, 32x32, 64x64, and 128x128 PNG icon images are stored. Supply `None` to resolve the two default locations. These being any encompasing package's icons at `../icons` and this package's included default icons at `./icons`.
         """
         # Get the directory of the package
         packageDir = os.path.split(__file__)[0]
@@ -61,18 +59,24 @@ class PygletImGui():
         self.window.on_key_press = self.onKeyPress
         self.window.on_key_release = self.onKeyRelease
 
-        # Build icon paths
-        icon16Path = os.path.join(packageDir, "icons", "16.png")
-        icon32Path = os.path.join(packageDir, "icons", "32.png")
-        icon64Path = os.path.join(packageDir, "icons", "64.png")
-        icon128Path = os.path.join(packageDir, "icons", "128.png")
+        # Check for a supplied icons package
+        if not ((iconsPath != None) and (os.path.isdir(os.path.abspath(iconsPath)))):
+            # Resolve default icon locations
+            iconsPath = os.path.join(packageDir, "../", "icons")
+
+            if not os.path.isdir(iconsPath):
+                # Load default icons package
+                iconsPath = os.path.join(packageDir, "icons")
+        else:
+            # Make sure its a full path
+            iconsPath = os.path.abspath(iconsPath)
 
         # Set the icons
         self.window.set_icon(
-            image.load(icon16Path),
-            image.load(icon32Path),
-            image.load(icon64Path),
-            image.load(icon128Path)
+            image.load(os.path.join(iconsPath, "16.png")),
+            image.load(os.path.join(iconsPath, "32.png")),
+            image.load(os.path.join(iconsPath, "64.png")),
+            image.load(os.path.join(iconsPath, "128.png"))
         )
 
         # Maximize if needed
