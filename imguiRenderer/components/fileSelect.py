@@ -10,6 +10,9 @@ class FileSelectorComponent():
     Allows for local file browsing and selection in ImGui.
     This includes class components to handle this.
     """
+    ## Statics
+    FS_BACK_INDICATOR = ".."
+
     ## Constructor
     def __init__(self, initialPath="./") -> None:
         """
@@ -102,9 +105,14 @@ class FileSelectorComponent():
         """
         # Check if the filename is present
         if filename in self._fsFilelist:
-            # Set the selected file
+            # Set the selected file normally
             self._fsSelected = self._fsFilelist.index(filename)
-            self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
+
+            if filename != FileSelectorComponent.FS_BACK_INDICATOR:
+                self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
+            else:
+                self.fsSelectedFilepath = self.fsFileDir
+
             self.fsInputPath = self.fsSelectedFilepath
 
     def _fsSetSelectedDir(self, dirname):
@@ -124,11 +132,14 @@ class FileSelectorComponent():
                 self.fsFileDir = self.expandStringPath(dirPath)
 
                 # Get the files at the start directory
-                self._fsFilelist = os.listdir(self.fsFileDir)
+                self._fsFilelist = sorted(os.listdir(self.fsFileDir))
+
+                # Add controls to the file list
+                self._fsFilelist.insert(0, FileSelectorComponent.FS_BACK_INDICATOR)
 
                 # Select the first item
-                self._fsSelected = 0
-                if len(self._fsFilelist) > 0:
+                self._fsSelected = 1
+                if len(self._fsFilelist) > 1:
                     # Start with the top file
                     self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
                 else:
