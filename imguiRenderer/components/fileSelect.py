@@ -29,10 +29,105 @@ class FileSelectorComponent():
         selectButton: A string to label the open action button with.
         cancelButton: A string to label the cancel action button with. Provide `None` to show no cancel option.
         """
+        # Define this operator's functions
+        def _fsSetSelectedFile(self, filename):
+            """
+            Sets the currently selected file for the file select.
+
+            filename: A string filename from the current directory to assign as selected.
+            """
+            # Check if the filename is present
+            if filename in self._fsFilelist:
+                # Set the selected file normally
+                self._fsSelected = self._fsFilelist.index(filename)
+
+                if filename != FileSelectorComponent.FS_BACK_INDICATOR:
+                    self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
+                else:
+                    self.fsSelectedFilepath = self.fsFileDir
+
+                self._fsInputPath = self.fsSelectedFilepath
+
+        def _fsSetSelectedDir(self, dirname):
+            """
+            Navigates the currently focused directory into the one provided.
+
+            dirname: A string directory name from the current directory to focus.
+            """
+            # Check if the directory name is present
+            if dirname in self._fsFilelist:
+                # Resolve the full new path
+                dirPath = os.path.join(self.fsFileDir, dirname)
+
+                # Check if a directory
+                if os.path.isdir(dirPath):
+                    # Set the new target directory
+                    self.fsFileDir = self.expandStringPath(dirPath)
+
+                    # Get the files at the start directory
+                    self._fsFilelist = sorted(os.listdir(self.fsFileDir))
+
+                    # Add controls to the file list
+                    self._fsFilelist.insert(0, FileSelectorComponent.FS_BACK_INDICATOR)
+
+                    # Select the first item
+                    self._fsSelected = 0
+                    self.fsSelectedFilepath = self.fsFileDir
+
+                    # Set the current input path
+                    self._fsInputPath = self.fsSelectedFilepath
+
+        def _fsSetToProvidedDir(self, dirPath):
+            """
+            Sets the currently focused directory to the provided.
+
+            dirPath: A string directory path to focus on.
+            """
+            # Expand the dirpath
+            dirPath = self.expandStringPath(dirPath)
+
+            # Check if the dirpath is a directory
+            if os.path.isdir(dirPath):
+                # Proceed with this directory
+                # Get the starting dir name
+                startingDir = os.path.basename(dirPath)
+
+                # Focus on the provided directory
+                self.fsFileDir = self.expandStringPath(os.path.join(dirPath, "../"))
+                self._fsFilelist = os.listdir(self.fsFileDir)
+                _fsSetSelectedDir(self, startingDir)
+            else:
+                # Get the file's directory name
+                _fsSetToProvidedDir(self, os.path.dirname(dirPath))
+
+        def _fsCompleteSelect(self, completion):
+            """
+            Completes the file select with as a selection action.
+
+            completion: A function to call in completetion. Provide `None` for no completion.
+            """
+            if completion != None:
+                completion(self._fsInputPath)
+
+            self.fsSelectedFilepath = self._fsInputPath
+            self._fsIsOpen = False
+
+        def _fsCompleteCancel(self, completion):
+            """
+            Completes the file select with as a cancel action.
+
+            completion: A function to call in completetion. Provide `None` for no completion.
+            """
+            if completion != None:
+                completion(None)
+
+            self.fsSelectedFilepath = None
+            self._fsIsOpen = False
+
         # Check if the file select is not yet open
         if not self._fsIsOpen:
             # Show the initial directory
-            self._fsSetToProvidedDir(FileSelectorComponent.FS_START_PATH)
+            _fsSetToProvidedDir(self, FileSelectorComponent.FS_START_PATH)
 
             # Mark as open
             self._fsIsOpen = True
@@ -54,7 +149,7 @@ class FileSelectorComponent():
         # Show top bar go button
         imgui.same_line()
         if imgui.button(label="Go", width=-1):
-            self._fsSetToProvidedDir(self._fsInputPath)
+            _fsSetToProvidedDir(self, self._fsInputPath)
 
         # Show directory content
         imgui.push_item_width(-1.0)
@@ -78,13 +173,13 @@ class FileSelectorComponent():
                     # Attempt to Enter or Execute
                     if isDir:
                         # Enter directory
-                        self._fsSetSelectedDir(f)
+                        _fsSetSelectedDir(self, f)
                     else:
                         # Execute file
                         pass
                 elif imgui.is_mouse_clicked():
                     # Selected
-                    self._fsSetSelectedFile(f)
+                    _fsSetSelectedFile(self, f)
 
         imgui.pop_item_width()
 
@@ -96,15 +191,15 @@ class FileSelectorComponent():
             btnCompW = round(winSizeAvail[0] / 2)
 
             if imgui.button(label=selectButton, width=btnCompW):
-                self._fsCompleteSelect(completion)
+                _fsCompleteSelect(self, completion)
 
             imgui.same_line()
             if imgui.button(label=cancelButton, width=btnCompW):
-                self._fsCompleteCancel(completion)
+                _fsCompleteCancel(self, completion)
         else:
             # Only select button
             if imgui.button(label=selectButton, width=-1.0):
-                self._fsCompleteSelect(completion)
+                _fsCompleteSelect(self, completion)
 
         # End window
         imgui.end()
@@ -121,97 +216,3 @@ class FileSelectorComponent():
         path = os.path.expanduser(path)
         path = os.path.abspath(path)
         return path
-
-    def _fsSetSelectedFile(self, filename):
-        """
-        Sets the currently selected file for the file select.
-
-        filename: A string filename from the current directory to assign as selected.
-        """
-        # Check if the filename is present
-        if filename in self._fsFilelist:
-            # Set the selected file normally
-            self._fsSelected = self._fsFilelist.index(filename)
-
-            if filename != FileSelectorComponent.FS_BACK_INDICATOR:
-                self.fsSelectedFilepath = os.path.join(self.fsFileDir, self._fsFilelist[self._fsSelected])
-            else:
-                self.fsSelectedFilepath = self.fsFileDir
-
-            self._fsInputPath = self.fsSelectedFilepath
-
-    def _fsSetSelectedDir(self, dirname):
-        """
-        Navigates the currently focused directory into the one provided.
-
-        dirname: A string directory name from the current directory to focus.
-        """
-        # Check if the directory name is present
-        if dirname in self._fsFilelist:
-            # Resolve the full new path
-            dirPath = os.path.join(self.fsFileDir, dirname)
-
-            # Check if a directory
-            if os.path.isdir(dirPath):
-                # Set the new target directory
-                self.fsFileDir = self.expandStringPath(dirPath)
-
-                # Get the files at the start directory
-                self._fsFilelist = sorted(os.listdir(self.fsFileDir))
-
-                # Add controls to the file list
-                self._fsFilelist.insert(0, FileSelectorComponent.FS_BACK_INDICATOR)
-
-                # Select the first item
-                self._fsSelected = 0
-                self.fsSelectedFilepath = self.fsFileDir
-
-                # Set the current input path
-                self._fsInputPath = self.fsSelectedFilepath
-
-    def _fsSetToProvidedDir(self, dirPath):
-        """
-        Sets the currently focused directory to the provided.
-
-        dirPath: A string directory path to focus on.
-        """
-        # Expand the dirpath
-        dirPath = self.expandStringPath(dirPath)
-
-        # Check if the dirpath is a directory
-        if os.path.isdir(dirPath):
-            # Proceed with this directory
-            # Get the starting dir name
-            startingDir = os.path.basename(dirPath)
-
-            # Focus on the provided directory
-            self.fsFileDir = self.expandStringPath(os.path.join(dirPath, "../"))
-            self._fsFilelist = os.listdir(self.fsFileDir)
-            self._fsSetSelectedDir(startingDir)
-        else:
-            # Get the file's directory name
-            self._fsSetToProvidedDir(os.path.dirname(dirPath))
-
-    def _fsCompleteSelect(self, completion):
-        """
-        Completes the file select with as a selection action.
-
-        completion: A function to call in completetion. Provide `None` for no completion.
-        """
-        if completion != None:
-            completion(self._fsInputPath)
-
-        self.fsSelectedFilepath = self._fsInputPath
-        self._fsIsOpen = False
-
-    def _fsCompleteCancel(self, completion):
-        """
-        Completes the file select with as a cancel action.
-
-        completion: A function to call in completetion. Provide `None` for no completion.
-        """
-        if completion != None:
-            completion(None)
-
-        self.fsSelectedFilepath = None
-        self._fsIsOpen = False
