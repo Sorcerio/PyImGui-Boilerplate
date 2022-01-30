@@ -134,7 +134,7 @@ class FileSelectorComponent():
 
         # Display the text input window
         winFlags = 0
-        winFlags |= imgui.WINDOW_NO_RESIZE
+        # winFlags |= imgui.WINDOW_NO_RESIZE
         winFlags |= imgui.WINDOW_NO_COLLAPSE
         imgui.begin(label="File Select", closable=False, flags=winFlags)
 
