@@ -133,27 +133,32 @@ class FileSelectorComponent():
             self._fsIsOpen = True
 
         # Display the text input window
-        imgui.begin(label="File Select", closable=False, flags=0)
+        winFlags = 0
+        winFlags |= imgui.WINDOW_NO_RESIZE
+        winFlags |= imgui.WINDOW_NO_COLLAPSE
+        imgui.begin(label="File Select", closable=False, flags=winFlags)
 
         # Get the available size for the window
         winSizeAvail = imgui.get_content_region_max()
 
-        # Calculate top bar size
-        barAddrW = (winSizeAvail[0] * .85)
+        # Define component sizes
+        btnW = 64
+        btnH = 32
 
         # Show top bar
-        imgui.push_item_width(barAddrW)
+        imgui.push_item_width(winSizeAvail[0] - btnW)
         clicked, self._fsInputPath = imgui.input_text(label="", value=self._fsInputPath, buffer_length=256)
         imgui.pop_item_width()
 
         # Show top bar go button
-        imgui.same_line()
-        if imgui.button(label="Go", width=-1):
+        imgui.same_line(spacing=0)
+        if imgui.button(label="Go", width=btnW):
             _fsSetToProvidedDir(self, self._fsInputPath)
 
         # Show directory content
-        imgui.push_item_width(-1.0)
+        imgui.begin_child("file_options_region", width=-1.0, height=256)
 
+        imgui.push_item_width(-1.0)
         for f in self._fsFilelist:
             # Decide if a directory
             isDir = os.path.isdir(os.path.join(self.fsFileDir, f))
@@ -180,8 +185,9 @@ class FileSelectorComponent():
                 elif imgui.is_mouse_clicked():
                     # Selected
                     _fsSetSelectedFile(self, f)
-
         imgui.pop_item_width()
+
+        imgui.end_child()
 
         # Show completion buttons
         # Check if a cancel option is available
@@ -190,15 +196,15 @@ class FileSelectorComponent():
             # Calculate button size
             btnCompW = round(winSizeAvail[0] / 2)
 
-            if imgui.button(label=selectButton, width=btnCompW):
+            if imgui.button(label=selectButton, width=btnCompW, height=btnH):
                 _fsCompleteSelect(self, completion)
 
             imgui.same_line()
-            if imgui.button(label=cancelButton, width=btnCompW):
+            if imgui.button(label=cancelButton, width=btnCompW, height=btnH):
                 _fsCompleteCancel(self, completion)
         else:
             # Only select button
-            if imgui.button(label=selectButton, width=-1.0):
+            if imgui.button(label=selectButton, width=-1.0, height=btnH):
                 _fsCompleteSelect(self, completion)
 
         # End window
