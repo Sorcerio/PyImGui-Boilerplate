@@ -58,6 +58,8 @@ class PygletImGui():
         self.window.on_resize = self.onResize
         self.window.on_key_press = self.onKeyPress
         self.window.on_key_release = self.onKeyRelease
+        self.window.on_mouse_press = self.onMousePress
+        self.window.on_mouse_release = self.onMouseRelease
 
         # Check for a supplied icons package
         if not ((iconsPath != None) and (os.path.isdir(os.path.abspath(iconsPath)))):
@@ -194,6 +196,28 @@ class PygletImGui():
 
         symbol: An int related to a Pyglet key value.
         modifiers: Bitwise combination of active key modifiers.
+        """
+        pass
+
+    def onMousePress(self, x, y, button, modifiers):
+        """
+        Called when the mouse is left, right, or middle clicked.
+
+        x: The X position of the mouse at the time.
+        y: The Y position of the mouse at the time.
+        button: `pyglet.window.mouse.LEFT`, `.MIDDLE`, or `.RIGHT` depending on the mouse button clicked.
+        modifiers: Bitwise combination of the active key modifiers.
+        """
+        pass
+
+    def onMouseRelease(self, x, y, button, modifiers):
+        """
+        Called when the mouse is left, right, or middle clicked.
+
+        x: The X position of the mouse at the time.
+        y: The Y position of the mouse at the time.
+        button: `pyglet.window.mouse.LEFT`, `.MIDDLE`, or `.RIGHT` depending on the mouse button clicked.
+        modifiers: Bitwise combination of the active key modifiers.
         """
         pass
 
