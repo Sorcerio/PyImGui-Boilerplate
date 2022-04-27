@@ -10,6 +10,7 @@ from imgui.integrations.pyglet import create_renderer
 
 from .testwindow import show_test_window
 from .components.all import AllComponents
+from .imguiImage import ImguiImage
 
 ## Constants
 DEFAULT_WIN_WIDTH = 1280
