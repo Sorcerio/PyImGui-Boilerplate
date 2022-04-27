@@ -105,14 +105,16 @@ class PygletImGui():
         """
         self.window.set_caption(title)
 
-    def addImguiTooltip(self, text):
+    def addImguiTooltip(self, text, onPrev=False):
         """
         When called before an ImGui element adds a tooltip.
-        From ImGui.
 
         text: A string to add to the tooltip.
+        onPrev: If `False`, creates a "(?)" text element that shows the tooltip when hovered. If `True`, makes the previous element show the tooltip when hovered.
         """
-        imgui.text_disabled("(?)")
+        if not onPrev:
+            imgui.text_disabled("(?)")
+
         if imgui.is_item_hovered():
             imgui.begin_tooltip()
             imgui.push_text_wrap_pos(imgui.get_font_size() * 35.0)
