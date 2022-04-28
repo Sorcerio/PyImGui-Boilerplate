@@ -18,7 +18,7 @@ class ImguiImage():
         """
         path: A string filepath poiting to the image file.
         metadata: A dict of additonal data for the item. Can also provided `None` for no additonal data.
-        thumbLimits: A tuple representing the maximum long and short sides of the generated thumbnail display texture as (long side length, short side length).
+        thumbLimits: A tuple representing the maximum long and short sides of the generated thumbnail display texture as (long side length, short side length). Provide `None` to use the image's real size.
         verbose: If `True`, enables verbose output.
         """
         # Provided
@@ -99,7 +99,7 @@ class ImguiImage():
             self._tempFile.close()
             self._tempFile = None
 
-    def draw(self, containerSize: tuple, shouldFit: bool = True, center: bool = True, offset = (0, 0)):
+    def draw(self, containerSize: tuple, shouldFit: bool = True, center: bool = True, offset = (0, 0), border=(0, 0, 0, 0)):
         """
         Draws this image into an ImGui window.
 
@@ -107,6 +107,7 @@ class ImguiImage():
         shouldFit: A boolean indicating if the source image should fit within the content area or cover the content area. Fit is indicated by `True` and ensures the whole source image will be seen but some background color may be visible. Cover is indicated by `False` and ensures that the entirety of the content area will be covered but the source image will likely be cropped.
         center: A boolean indicating if the rendered image should be centered in the provided `containerSize`.
         offset: A tuple containing points of offset for the image as (x, y).
+        border: An RGBA tuple containing a border color as (r, g, b, a).
         """
         # Check if image item was loaded
         if self.loaded:
@@ -143,7 +144,8 @@ class ImguiImage():
                 width=modImgSize[0],
                 height=modImgSize[1],
                 uv0=(0, 0),
-                uv1=texOffset
+                uv1=texOffset,
+                border_color=border
             )
         else:
             # Draw text instead
@@ -187,12 +189,13 @@ class ImguiImage():
         # Create thumbnail
         imgThumb = self._tempFile.copy()
 
-        if imgThumb.size[0] > imgThumb.size[1]:
-            # Width > height
-            imgThumb.thumbnail((self._thumbLimit[0], self._thumbLimit[1]))
-        else:
-            # Height > width
-            imgThumb.thumbnail((self._thumbLimit[1], self._thumbLimit[0]))
+        if self._thumbLimit != None:
+            if imgThumb.size[0] > imgThumb.size[1]:
+                # Width > height
+                imgThumb.thumbnail((self._thumbLimit[0], self._thumbLimit[1]))
+            else:
+                # Height > width
+                imgThumb.thumbnail((self._thumbLimit[1], self._thumbLimit[0]))
 
         # Get the image bytes
         imgBytes = BytesIO()
