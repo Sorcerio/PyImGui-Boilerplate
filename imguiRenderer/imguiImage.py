@@ -99,13 +99,14 @@ class ImguiImage():
             self._tempFile.close()
             self._tempFile = None
 
-    def draw(self, containerSize: tuple, shouldFit: bool = True, center: bool = True):
+    def draw(self, containerSize: tuple, shouldFit: bool = True, center: bool = True, offset = (0, 0)):
         """
         Draws this image into an ImGui window.
 
         containerSize: A tuple containing the container's size as (width, height).
         shouldFit: A boolean indicating if the source image should fit within the content area or cover the content area. Fit is indicated by `True` and ensures the whole source image will be seen but some background color may be visible. Cover is indicated by `False` and ensures that the entirety of the content area will be covered but the source image will likely be cropped.
         center: A boolean indicating if the rendered image should be centered in the provided `containerSize`.
+        offset: A tuple containing points of offset for the image as (x, y).
         """
         # Check if image item was loaded
         if self.loaded:
@@ -121,10 +122,22 @@ class ImguiImage():
                 tex.height / self._nearestPowerOfTwo(tex.height)
             )
 
-            # Display image
-            if center:
-                imgui.set_cursor_pos((((imgui.get_window_width() - modImgSize[0]) * 0.5), imgui.get_cursor_pos()[1]))
+            # Calculate position
+            cursorX = 0
+            cursorY = 0
 
+            if center:
+                cursorX += ((imgui.get_window_width() - modImgSize[0]) * 0.5)
+                cursorY += imgui.get_cursor_pos()[1]
+
+            if offset != (0, 0):
+                cursorX += offset[0]
+                cursorY += offset[1]
+
+            if not ((cursorX == 0) and (cursorY == 0)):
+                imgui.set_cursor_pos((cursorX, cursorY))
+
+            # Display image
             imgui.image(
                 texture_id=tex.id,
                 width=modImgSize[0],
