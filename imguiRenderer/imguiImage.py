@@ -101,7 +101,7 @@ class ImguiImage():
 
     def draw(self, containerSize: tuple, shouldFit: bool = True, center: bool = True, offset = (0, 0), border=(0, 0, 0, 0)):
         """
-        Draws this image into an ImGui window.
+        Draws this image into an ImGui window as an ImGui Image.
 
         containerSize: A tuple containing the container's size as (width, height).
         shouldFit: A boolean indicating if the source image should fit within the content area or cover the content area. Fit is indicated by `True` and ensures the whole source image will be seen but some background color may be visible. Cover is indicated by `False` and ensures that the entirety of the content area will be covered but the source image will likely be cropped.
@@ -111,41 +111,18 @@ class ImguiImage():
         """
         # Check if image item was loaded
         if self.loaded:
-            # Calculate the image size
-            modImgSize, imgAnchor = self._calculateContentBestSize(self.size(), containerSize, shouldFit)
-
             # Get the texture
             tex = self.getTexture()
 
-            # Calculate texture offset
-            texOffset = (
-                tex.width / self._nearestPowerOfTwo(tex.width),
-                tex.height / self._nearestPowerOfTwo(tex.height)
-            )
-
-            # Calculate position
-            cursorX = 0
-            cursorY = 0
-
-            if center:
-                cursorX += ((imgui.get_window_width() - modImgSize[0]) * 0.5)
-                cursorY += imgui.get_cursor_pos()[1]
-
-            if offset != (0, 0):
-                cursorX += offset[0]
-                cursorY += offset[1]
-
-            if not ((cursorX == 0) and (cursorY == 0)):
-                imgui.set_cursor_pos((cursorX, cursorY))
-
-            # Display image
-            imgui.image(
-                texture_id=tex.id,
-                width=modImgSize[0],
-                height=modImgSize[1],
-                uv0=(0, 0),
-                uv1=texOffset,
-                border_color=border
+            # Draw the texture
+            ImguiImage.drawTexture(
+                tex,
+                self.size(),
+                containerSize,
+                shouldFit,
+                center,
+                offset,
+                border
             )
         else:
             # Draw text instead
@@ -212,7 +189,8 @@ class ImguiImage():
         # Close the thumbnail
         imgThumb.close()
 
-    def _nearestPowerOfTwo(self, x):
+    # Static Functions
+    def nearestPowerOfTwo(x):
         """
         Calculates the nearest power of two (+ or -) for `x`.
 
@@ -220,9 +198,9 @@ class ImguiImage():
         """
         return 1 << (x - 1).bit_length()
 
-    def _calculateContentBestSize(self, contentSize: tuple, containerSize: tuple, shouldFit: bool):
+    def calculateContentBestSize(contentSize: tuple, containerSize: tuple, shouldFit: bool):
         """
-        Calculates the ideal size and center anchor point for the provided content size within this object's specified width and height.
+        Calculates the ideal size and center anchor point for the provided content size within the specified width and height.
 
         contentSize: A tuple containing the source content's size as (width, height).
         containerSize: A tuple containing the container's size as (width, height).
@@ -257,4 +235,49 @@ class ImguiImage():
         return (
             (finalW, finalH),
             (pasteOffsetX, pasteOffsetY)
+        )
+
+    def drawTexture(tex, size: tuple, containerSize: tuple, shouldFit: bool, center: bool, offset: tuple, border: tuple):
+        """
+        Draws the provided texture into an ImGui window as an ImGui Image.
+
+        tex: A GL compatible texture.
+        containerSize: A tuple containing the container's size as (width, height).
+        shouldFit: A boolean indicating if the source image should fit within the content area or cover the content area. Fit is indicated by `True` and ensures the whole source image will be seen but some background color may be visible. Cover is indicated by `False` and ensures that the entirety of the content area will be covered but the source image will likely be cropped.
+        center: A boolean indicating if the rendered image should be centered in the provided `containerSize`.
+        offset: A tuple containing points of offset for the image as (x, y).
+        border: An RGBA tuple containing a border color as (r, g, b, a).
+        """
+        # Calculate the image size
+        modImgSize, imgAnchor = ImguiImage.calculateContentBestSize(size, containerSize, shouldFit)
+
+        # Calculate texture offset
+        texOffset = (
+            tex.width / ImguiImage.nearestPowerOfTwo(tex.width),
+            tex.height / ImguiImage.nearestPowerOfTwo(tex.height)
+        )
+
+        # Calculate position
+        cursorX = 0
+        cursorY = 0
+
+        if center:
+            cursorX += ((imgui.get_window_width() - modImgSize[0]) * 0.5)
+            cursorY += imgui.get_cursor_pos()[1]
+
+        if offset != (0, 0):
+            cursorX += offset[0]
+            cursorY += offset[1]
+
+        if not ((cursorX == 0) and (cursorY == 0)):
+            imgui.set_cursor_pos((cursorX, cursorY))
+
+        # Display image
+        imgui.image(
+            texture_id=tex.id,
+            width=modImgSize[0],
+            height=modImgSize[1],
+            uv0=(0, 0),
+            uv1=texOffset,
+            border_color=border
         )
