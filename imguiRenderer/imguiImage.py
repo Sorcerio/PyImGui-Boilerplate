@@ -242,6 +242,7 @@ class ImguiImage():
         Draws the provided texture into an ImGui window as an ImGui Image.
 
         tex: A GL compatible texture.
+        size: A tuple containing the dimensions of the texture as (width, height).
         containerSize: A tuple containing the container's size as (width, height).
         shouldFit: A boolean indicating if the source image should fit within the content area or cover the content area. Fit is indicated by `True` and ensures the whole source image will be seen but some background color may be visible. Cover is indicated by `False` and ensures that the entirety of the content area will be covered but the source image will likely be cropped.
         center: A boolean indicating if the rendered image should be centered in the provided `containerSize`.
