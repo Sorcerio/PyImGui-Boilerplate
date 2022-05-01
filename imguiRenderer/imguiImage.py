@@ -3,6 +3,7 @@
 
 ## Imports
 import os
+from turtle import back
 import imgui
 from io import BytesIO
 from PIL import Image
@@ -46,12 +47,13 @@ class ImguiImage():
         return hash(self.path)
 
     # Functions
-    def load(self, skipTexture = False):
+    def load(self, skipTexture = False, background: tuple = None):
         """
         Loads the image into a temporary file if it is remote.
         If the file is local, the image is prepared.
 
         skipTexture: If True, the display texture will not preloaded.
+        background: A tuple containing a background color to add behind the image as (r, g, b)[255]. Supply `None` to indicate no background should be added.
         """
         # Close if a previous exists
         if self._tempFile != None:
@@ -59,8 +61,19 @@ class ImguiImage():
 
         # Check if the local file exists
         if os.path.isfile(self.path):
-            # Open the image
-            workingImg = Image.open(self.path)
+            # Check if background color provided
+            if background != None:
+                # Create background image
+                # Open the target image
+                with Image.open(self.path) as targetImg:
+                    # Create working image
+                    workingImg = Image.new("RGBA", targetImg.size, background)
+
+                    # Paste the target image into the background
+                    workingImg.paste(targetImg, (0, 0), targetImg)
+            else:
+                # Open the image
+                workingImg = Image.open(self.path)
 
             # Flip the image for texture display
             self._tempFile = workingImg.transpose(Image.FLIP_TOP_BOTTOM)
@@ -80,6 +93,7 @@ class ImguiImage():
 
             # Mark as loaded
             self.loaded = True
+            workingImg.close()
         else:
             # Report the problem and release the tempfile
             print(f"{self} has been provided with incorrect path information.")
@@ -127,6 +141,37 @@ class ImguiImage():
         else:
             # Draw text instead
             imgui.text("Image has not been loaded.")
+
+    def drawButton(self, containerSize: tuple, shouldFit: bool = True, center: bool = True, offset = (0, 0), border=(0, 0, 0, 0)) -> bool:
+        """
+        Draws this image into an ImGui window as an ImGui Image.
+
+        containerSize: A tuple containing the container's size as (width, height).
+        shouldFit: A boolean indicating if the source image should fit within the content area or cover the content area. Fit is indicated by `True` and ensures the whole source image will be seen but some background color may be visible. Cover is indicated by `False` and ensures that the entirety of the content area will be covered but the source image will likely be cropped.
+        center: A boolean indicating if the rendered image should be centered in the provided `containerSize`.
+        offset: A tuple containing points of offset for the image as (x, y).
+        border: An RGBA tuple containing a border color as (r, g, b, a).
+        """
+        # Check if image item was loaded
+        if self.loaded:
+            # Get the texture
+            tex = self.getTexture()
+
+            # Draw the texture
+            return ImguiImage.drawTexture(
+                tex,
+                self.size(),
+                containerSize,
+                shouldFit,
+                center,
+                offset,
+                border,
+                asButton=True
+            )
+        else:
+            # Draw text instead
+            imgui.text("Image has not been loaded.")
+            return False
 
     def size(self):
         """
@@ -237,7 +282,7 @@ class ImguiImage():
             (pasteOffsetX, pasteOffsetY)
         )
 
-    def drawTexture(tex, size: tuple, containerSize: tuple, shouldFit: bool, center: bool, offset: tuple, border: tuple):
+    def drawTexture(tex, size: tuple, containerSize: tuple, shouldFit: bool, center: bool, offset: tuple, border: tuple, asButton: bool = False):
         """
         Draws the provided texture into an ImGui window as an ImGui Image.
 
@@ -248,6 +293,7 @@ class ImguiImage():
         center: A boolean indicating if the rendered image should be centered in the provided `containerSize`.
         offset: A tuple containing points of offset for the image as (x, y).
         border: An RGBA tuple containing a border color as (r, g, b, a).
+        asButton: If the texture should be drawn as a button. If the texture should be drawn as a button, will return `True` if the image is clicked. In all other cases, returns `False`.
         """
         # Calculate the image size
         modImgSize, imgAnchor = ImguiImage.calculateContentBestSize(size, containerSize, shouldFit)
@@ -273,12 +319,25 @@ class ImguiImage():
         if not ((cursorX == 0) and (cursorY == 0)):
             imgui.set_cursor_pos((cursorX, cursorY))
 
-        # Display image
-        imgui.image(
-            texture_id=tex.id,
-            width=modImgSize[0],
-            height=modImgSize[1],
-            uv0=(0, 0),
-            uv1=texOffset,
-            border_color=border
-        )
+        # Check if button or image
+        if not asButton:
+            # Display image
+            imgui.image(
+                texture_id=tex.id,
+                width=modImgSize[0],
+                height=modImgSize[1],
+                uv0=(0, 0),
+                uv1=texOffset,
+                border_color=border
+            )
+            return False
+        else:
+            # Display button
+            return imgui.image_button(
+                texture_id=tex.id,
+                width=modImgSize[0],
+                height=modImgSize[1],
+                uv0=(0, 0),
+                uv1=texOffset,
+                border_color=border
+            )
