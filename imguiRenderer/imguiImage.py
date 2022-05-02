@@ -3,7 +3,6 @@
 
 ## Imports
 import os
-from turtle import back
 import imgui
 from io import BytesIO
 from PIL import Image
@@ -35,10 +34,10 @@ class ImguiImage():
 
     ## Internal
     def __str__(self) -> str:
-        return f"\"{self.title}\" at \"{self.path}\""
+        return f"Image at \"{self.path}\""
 
     def __repr__(self) -> str:
-        return f"<{self.title}_{self.__hash__()}>"
+        return f"<{os.path.basename(self.path)}_{self.__hash__()}>"
 
     def __del__(self):
         self.close()
