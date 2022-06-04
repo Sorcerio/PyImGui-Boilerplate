@@ -3,5 +3,6 @@ __all__ = [
     "all",
     "alerts",
     "inputs",
-    "fileSelect"
+    "fileSelect",
+    "generalUi"
 ]

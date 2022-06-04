@@ -5,9 +5,10 @@
 from .alerts import AlertsComponents
 from .inputs import InputComponents
 from .fileSelect import FileSelectorComponent
+from .generalUi import GeneralUiFunctions
 
 ## Classes
-class AllComponents(AlertsComponents, InputComponents, FileSelectorComponent):
+class AllComponents(AlertsComponents, InputComponents, FileSelectorComponent, GeneralUiFunctions):
     """
     Includes access to all components and their class components.
     """
@@ -16,3 +17,4 @@ class AllComponents(AlertsComponents, InputComponents, FileSelectorComponent):
         super(AlertsComponents, self).__init__()
         super(InputComponents, self).__init__()
         super(FileSelectorComponent, self).__init__()
+        super(GeneralUiFunctions, self).__init__()
