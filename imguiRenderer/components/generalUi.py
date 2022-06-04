@@ -24,7 +24,20 @@ class GeneralUiFunctions():
         imgui.same_line()
         if imgui.button(f"... {filepath[-32:]}"):
             self._openFilepathExternally(filepath)
-        self._addTooltip("Open externally")
+        self.addTooltip("Open externally")
+
+    def addTooltip(self, text: str):
+        """
+        Adds a tooltip to the preceeding ImGui element.
+
+        text: A string to add to the tooltip.
+        """
+        if imgui.is_item_hovered():
+            imgui.begin_tooltip()
+            imgui.push_text_wrap_pos(imgui.get_font_size() * 35.0)
+            imgui.text_unformatted(text)
+            imgui.pop_text_wrap_pos()
+            imgui.end_tooltip()
 
     ## Private Functions
     def _openFilepathExternally(self, path):
