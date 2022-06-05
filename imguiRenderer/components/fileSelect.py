@@ -20,14 +20,16 @@ class FileSelectorComponent():
         self._fsIsOpen = False
 
     ## UI Functions
-    def uiFileSelect(self, completion = None, selectButton = "Open", cancelButton = "Cancel"):
+    def uiFileSelect(self, completion = None, selectButton = "Open", cancelButton = "Cancel", allowFiles = True, allowDirs = True):
         """
         Renders a File Select Ui.
         The currently selected path is accessible at `fsSelectedFilepath`.
 
-        completion: A function to execute when the select or cancel buttons are pressed. This function must has 1 parameter to take the selected filepath. `None` will be sent to the provided completion function if the cancel action is taken. Provide `None` here to provide no completion.
+        completion: A function to execute when the select or cancel buttons are pressed. This function must have 1 parameter to take the selected filepath. `None` will be sent to the provided completion function if the cancel action is taken. Provide `None` here to provide no completion.
         selectButton: A string to label the open action button with.
         cancelButton: A string to label the cancel action button with. Provide `None` to show no cancel option.
+        allowFiles: If selection of a file is accepted as a valid completion return.
+        allowDirs: If selection of a directory is accepted as a valid completion return.
         """
         # Define this operator's functions
         def _fsSetSelectedFile(self, filename):
@@ -106,11 +108,24 @@ class FileSelectorComponent():
 
             completion: A function to call in completetion. Provide `None` for no completion.
             """
-            if completion != None:
-                completion(self._fsInputPath)
+            # Check if input path is of a valid type
+            isValid = True
+            if (allowFiles and not allowDirs) and os.path.isdir(self._fsInputPath):
+                # Selected a dir while only allowing files
+                isValid = False
+            elif (allowDirs and not allowFiles) and os.path.isfile(self._fsInputPath):
+                # Selected a file while only allowing dirs
+                isValid = False
 
-            self.fsSelectedFilepath = self._fsInputPath
-            self._fsIsOpen = False
+            # Exit only if valid
+            if isValid:
+                # Run completion if available
+                if completion != None:
+                    completion(self._fsInputPath)
+
+                # Reset the file selector
+                self.fsSelectedFilepath = self._fsInputPath
+                self._fsIsOpen = False
 
         def _fsCompleteCancel(self, completion):
             """
@@ -118,9 +133,11 @@ class FileSelectorComponent():
 
             completion: A function to call in completetion. Provide `None` for no completion.
             """
+            # Run completion if available
             if completion != None:
                 completion(None)
 
+            # Reset the file selector
             self.fsSelectedFilepath = None
             self._fsIsOpen = False
 
