@@ -113,9 +113,11 @@ class FileSelectorComponent():
             if (allowFiles and not allowDirs) and os.path.isdir(self._fsInputPath):
                 # Selected a dir while only allowing files
                 isValid = False
+                print("Only files may be selected.")
             elif (allowDirs and not allowFiles) and os.path.isfile(self._fsInputPath):
                 # Selected a file while only allowing dirs
                 isValid = False
+                print("Only directories may be selected.")
 
             # Exit only if valid
             if isValid:
